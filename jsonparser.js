@@ -25,7 +25,7 @@ function numparser(inp){
   //const re=/^((-?[^+0\"])|(-?[^+\"](0\.)))\d+/;
 //((e|E)(+|-)?\d+)?
 
-const re=/^(([^\+]-?)|[1-9]*)(0(?=\.(?=\d+))|[1-9]+\.(?=\d+)|[1-9]+)((e|E|)(\+|-|)\d+|)/;
+const re=/^-?(0(?=\.\d+)|[1-9]\d*)(\.\d+|)((e|E)(\+|-|)\d+|)/;
   if(!re.test(inp)) return null;
   return [re.exec(inp)[0]*1, inp.replace(re.exec(inp)[0],'')];
 }
