@@ -13,68 +13,54 @@ function prompt(callback) {
   }
 
 function nullparser(inp){
-
-if(!inp.startsWith("null"))return null;
-return [null,inp.slice(4)];
+  if (!inp.startsWith("null")) return null
+  return [null,inp.slice(4)]
 }
 
 
 function numparser(inp){
-
-  //if(!Number.isInteger(inp[0]*1) && inp[0]!='-') return null;
-  //const re=/^((-?[^+0\"])|(-?[^+\"](0\.)))\d+/;
-//((e|E)(+|-)?\d+)?
-
-const re=/^-?(0(?=\.\d+)|[1-9]\d*)(\.\d+|)((e|E)(\+|-|)\d+|)/;
-  if(!re.test(inp)) return null;
-  return [re.exec(inp)[0]*1, inp.replace(re.exec(inp)[0],'')];
+  let result
+  return (result = inp.match(/^-?(0(?=\.\d+)|[1-9]\d*)(\.\d+|)((e|E)(\+|-|)\d+|)/)) &&
+    [result[0] * 1, inp.slice(result[0].length)]
 }
 
 
 function strparser(inp){
+    if(!inp.startsWith('"')) return null
 
-  /*const re=/^\"(\\\")|[^\"].*\"/;
-  let esc={'\':'\\', 'b':'\b', 't':'\t', '"':'\"', 'n':'\n', 'f':'\f', 'r':'\r', '/':'\/', 'u':'\u'};
+    //const re=/"([^"\\]*|([^"\\]*(\\("|\\|\/|t|b|n|f|r))*)[^"\\]*|)"/;
+ 
+    let dict={ '\\':'\\', '/':'/','"':'\"', 'b':'\b', 't':'\t', 'n':'\n', 'f':'\f', 'r':'\r'}
+    let val="", isescape=false
+    let str=inp.slice(1)
 
-  if(!re.test(inp)) return null;
-  
-  let match=re.exec(inp);
-  console.log(match);
-  match[0].replace(match[1],esc[match[1]]);
-  return [match[0], inp.replace(re.exec(inp)[0],'')];*/
+    while(str[0]!='"'){
 
-  if(!inp.startsWith('"'))return null;
+        if(isescape==true){
 
-  let esc={'\\':'\\', 'b':'\b', 't':'\t', '"':'"', 'n':'\n', 'f':'\f', 'r':'\r', '/':'/'};
-  let back=inp.includes("\\");
-  //console.log(back);
-  if(!back){
+            if(dict[str[0]]==undefined) return null
+            val+=dict[str[0]]
+            isescape=false
+            str=str.slice(1)
+            continue
+        }
+            
+        if(str[0]=='\\') isescape=true;
+        //else if(str[0]=='"' && isescape==false) return null;
+        else val+=str[0]
+        str=str.slice(1)
+    }
 
-    if(inp.slice(1).includes('"')){
-
-      let val=inp.slice(0,inp.indexOf('"',1)+1);
-      console.log(val);
-      return [val.replace(/\"/g,''), inp.replace(val,'')];
-    } 
-    else return null;
-  } 
-
-  if(back){
-
-    return [inp.replace]
-  }
+    console.log(val);
+    return [val.slice(1,val.length-1),inp.replace(val,'')];
 }
 
 
 function boolparser(inp){
+  if (inp.startsWith("false")) return [false, inp.slice(5)]
+  if (inp.startsWith("true")) return [true, inp.slice(4)]
 
-  let bool=true;
-  if(inp.startsWith('"')) return null;
-
-  if(inp.startsWith("false")) bool=false;
-  else if(!inp.startsWith("true")) return null;
-
-  return [bool,inp.replace(bool,'')];
+  return null
 }
 
 
