@@ -1,16 +1,16 @@
 'use strict';
 
 function prompt(callback) {
-    let stdin = process.stdin
-    let stdout = process.stdout
+  let stdin = process.stdin
+  let stdout = process.stdout
   
-    stdin.resume()
+  stdin.resume()
     //stdout.write(question)
   
-    stdin.once('data', function (data) {
-      callback(data.toString().trim())
-    })
-  }
+  stdin.once('data', function (data) {
+    callback(data.toString().trim())
+  })
+}
 
 function nullparser(inp){
   if (!inp.startsWith("null")) return null
@@ -26,33 +26,34 @@ function numparser(inp){
 
 
 function strparser(inp){
-    if(!inp.startsWith('"')) return null
-
-    //const re=/"([^"\\]*|([^"\\]*(\\("|\\|\/|t|b|n|f|r))*)[^"\\]*|)"/;
+  if(!inp.startsWith('"')) return null
+  //const re=/"([^"\\]*|([^"\\]*(\\("|\\|\/|t|b|n|f|r))*)[^"\\]*|)"/;
  
-    let dict={ '\\':'\\', '/':'/','"':'\"', 'b':'\b', 't':'\t', 'n':'\n', 'f':'\f', 'r':'\r'}
-    let val="", isescape=false
-    let str=inp.slice(1)
+  let dict={ '\\':'\\', '/':'/','"':'\"', 'b':'\b', 't':'\t', 'n':'\n', 'f':'\f', 'r':'\r'}
+  let val='"', index=1
+  let str=inp.slice(1)
 
-    while(str[0]!='"'){
+  while(str[0]!='"'){
 
-        if(isescape==true){
+    if(str[0]=='\\'){
 
-            if(dict[str[0]]==undefined) return null
-            val+=dict[str[0]]
-            isescape=false
-            str=str.slice(1)
-            continue
-        }
-            
-        if(str[0]=='\\') isescape=true;
-        //else if(str[0]=='"' && isescape==false) return null;
-        else val+=str[0]
-        str=str.slice(1)
+      if(dict[str[1]]==undefined) return null
+      val+=dict[str[1]]
+      index+=2
+      str=str.slice(2)
+      if(str.indexOf('"')==-1) return null
+      continue
     }
 
-    console.log(val);
-    return [val.slice(1,val.length-1),inp.replace(val,'')];
+    val+=str[0];index++  
+    str=str.slice(1)
+    if(str.length==0) return null
+  }
+
+  if(str.length>=1) val+='"';index++
+  //console.log(val)
+  if(val.length==1 || (val.length>1 && val[val.length-1]!='"')) return null  
+  return [val.slice(1,val.length-1 ),inp.slice(index)]
 }
 
 
@@ -65,12 +66,14 @@ function boolparser(inp){
 
 
 prompt(function(input){
+  let parser=[nullparser, boolparser, numparser, strparser]
+  let result=null
+  for(let func of parser){
 
-  console.log("null : ", nullparser(input));
-  console.log("num : ", numparser(input));
-  console.log("string : ", strparser(input));
-  console.log("bool : ", boolparser(input));
-  
+    if(!result) result=func(input) 
+    else break
+  }
+  console.log(result?result:"Invalid JSON")  
   process.exit();
 })
 
